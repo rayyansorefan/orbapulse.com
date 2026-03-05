@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orba Pulse — Your Daily Mood Companion</title>
+    <meta name="description" content="Track your emotional pulse. Reflect deeper. Discover your archetype. Orba Pulse is a beautifully crafted mood companion for iOS and Android.">
+    <meta property="og:title" content="Orba Pulse — Your Daily Mood Companion">
+    <meta property="og:description" content="Track your emotional pulse. Reflect deeper. Discover your archetype.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://orbapulse.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #05030F;
+            --accent: #9D8DF1;
+            --glow: #9D8DF1;
+            --text: #EEE8FF;
+            --text-dim: #ffffff40;
+            --text-faint: #ffffff18;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Atmospheric background ── */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .atmosphere::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140%;
+            height: 70%;
+            background: radial-gradient(ellipse at center, rgba(157,141,241,0.08) 0%, transparent 65%);
+        }
+        .atmosphere::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 50%;
+            background: radial-gradient(ellipse at center bottom, rgba(157,141,241,0.04) 0%, transparent 60%);
+        }
+
+        /* ── Layout ── */
+        .page { position: relative; z-index: 1; }
+
+        section {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 28px;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 80px;
+            padding-bottom: 60px;
+        }
+
+        /* ── Orb ── */
+        .orb-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin-bottom: 48px;
+        }
+        .orb-glow {
+            position: absolute;
+            inset: -40%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157,141,241,0.12) 0%, transparent 70%);
+            animation: orbBreathe 6s ease-in-out infinite;
+        }
+        .orb-glow-2 {
+            position: absolute;
+            inset: -20%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157,141,241,0.18) 0%, transparent 65%);
+            animation: orbBreathe 6s ease-in-out infinite 0.5s;
+        }
+        .orb-body {
+            position: absolute;
+            inset: 15%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 32% 28%, #9D8DF1, #7B61FF 55%, #4A3F8C);
+            box-shadow: 0 0 80px rgba(157,141,241,0.4), 0 0 30px rgba(157,141,241,0.3), inset 0 -20px 40px rgba(74,63,140,0.5);
+            animation: orbPulse 6s ease-in-out infinite;
+        }
+        .orb-highlight {
+            position: absolute;
+            top: 18%;
+            left: 20%;
+            width: 35%;
+            height: 25%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, transparent 70%);
+            transform: rotate(-20deg);
+        }
+        .orb-inner {
+            position: absolute;
+            top: 25%;
+            left: 28%;
+            width: 40%;
+            height: 40%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157,141,241,0.35) 0%, transparent 70%);
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: #C8BFFF;
+            animation: particleOrbit var(--dur) linear infinite;
+        }
+
+        @keyframes orbBreathe {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(0.97); }
+            50% { transform: scale(1.04); }
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(8%, -5%); }
+            66% { transform: translate(-5%, 8%); }
+        }
+        @keyframes particleOrbit {
+            from { transform: rotate(var(--start)) translateX(var(--dist)) rotate(calc(-1 * var(--start))); opacity: var(--o1); }
+            50% { opacity: var(--o2); }
+            to { transform: rotate(calc(var(--start) + 360deg)) translateX(var(--dist)) rotate(calc(-1 * (var(--start) + 360deg))); opacity: var(--o1); }
+        }
+
+        /* ── Typography ── */
+        .brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 52px;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 12px;
+            line-height: 1;
+        }
+        .tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-style: italic;
+            font-size: 20px;
+            color: var(--text-dim);
+            margin-bottom: 40px;
+            letter-spacing: 0.04em;
+        }
+        .description {
+            font-size: 15px;
+            color: var(--text-dim);
+            line-height: 1.75;
+            max-width: 480px;
+            margin-bottom: 48px;
+        }
+
+        /* ── Store buttons ── */
+        .store-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+        .store-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 14px;
+            border: 1px solid rgba(157,141,241,0.3);
+            background: rgba(157,141,241,0.08);
+            color: var(--accent);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.03em;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .store-btn:hover {
+            background: rgba(157,141,241,0.18);
+            border-color: rgba(157,141,241,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(157,141,241,0.2);
+        }
+
+        .social-link {
+            font-size: 13px;
+            color: var(--text-faint);
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .social-link:hover { color: var(--accent); }
+
+        /* ── Features ── */
+        .features {
+            padding: 80px 28px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .features-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 32px;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 48px;
+            letter-spacing: 0.06em;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 24px 20px;
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        .feature-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .feature-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* ── Moods section ── */
+        .moods {
+            padding: 60px 28px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .mood-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+        .mood-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+        }
+        .mood-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .mood-label {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(157,141,241,0.15), transparent);
+            margin: 0 auto;
+            max-width: 300px;
+        }
+
+        /* ── Privacy ── */
+        .privacy {
+            padding: 80px 28px;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        .privacy h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 28px;
+            color: var(--accent);
+            margin-bottom: 24px;
+            letter-spacing: 0.04em;
+        }
+        .privacy h3 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--text);
+            margin: 20px 0 8px;
+        }
+        .privacy p, .privacy li {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+        .privacy ul { padding-left: 20px; }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 48px 28px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+        .footer-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 20px;
+            color: var(--accent);
+            opacity: 0.5;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+        .footer-copy {
+            font-size: 11px;
+            color: var(--text-faint);
+            letter-spacing: 0.08em;
+        }
+        .footer-links {
+            margin-top: 12px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .footer-links a {
+            font-size: 11px;
+            color: var(--text-faint);
+            text-decoration: none;
+            letter-spacing: 0.06em;
+        }
+        .footer-links a:hover { color: var(--accent); }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .brand { font-size: 38px; }
+            .tagline { font-size: 17px; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .orb-container { width: 170px; height: 170px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="atmosphere"></div>
+    <div class="page">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="orb-container">
+                <div class="orb-glow"></div>
+                <div class="orb-glow-2"></div>
+                <div class="orb-body">
+                    <div class="orb-highlight"></div>
+                    <div class="orb-inner"></div>
+                </div>
+                <!-- Particles -->
+                <div class="particle" style="width:4px;height:4px;--start:0deg;--dist:130px;--dur:9s;--o1:0.3;--o2:0.7;top:50%;left:50%;"></div>
+                <div class="particle" style="width:3px;height:3px;--start:45deg;--dist:120px;--dur:11s;--o1:0.5;--o2:0.2;top:50%;left:50%;"></div>
+                <div class="particle" style="width:5px;height:5px;--start:90deg;--dist:140px;--dur:8s;--o1:0.2;--o2:0.6;top:50%;left:50%;"></div>
+                <div class="particle" style="width:3px;height:3px;--start:135deg;--dist:115px;--dur:12s;--o1:0.4;--o2:0.8;top:50%;left:50%;"></div>
+                <div class="particle" style="width:4px;height:4px;--start:180deg;--dist:135px;--dur:10s;--o1:0.6;--o2:0.3;top:50%;left:50%;"></div>
+                <div class="particle" style="width:2px;height:2px;--start:225deg;--dist:125px;--dur:13s;--o1:0.3;--o2:0.7;top:50%;left:50%;"></div>
+                <div class="particle" style="width:4px;height:4px;--start:270deg;--dist:145px;--dur:9.5s;--o1:0.5;--o2:0.2;top:50%;left:50%;"></div>
+                <div class="particle" style="width:3px;height:3px;--start:315deg;--dist:118px;--dur:11.5s;--o1:0.2;--o2:0.5;top:50%;left:50%;"></div>
+            </div>
+
+            <h1 class="brand">orba pulse</h1>
+            <p class="tagline">your daily mood companion</p>
+            <p class="description">
+                One check-in a day. An orb that mirrors how you feel.
+                Cards that challenge you to reflect. An archetype that
+                emerges from your patterns. Orba Pulse is a space to
+                know yourself better.
+            </p>
+
+            <div class="store-buttons">
+                <a href="#" class="store-btn">
+                    <span>&#63743;</span> App Store — Coming Soon
+                </a>
+                <a href="#" class="store-btn">
+                    <span>&#9654;</span> Google Play — Coming Soon
+                </a>
+            </div>
+
+            <a href="https://instagram.com/orba_pulse" target="_blank" class="social-link">
+                @orba_pulse
+            </a>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- FEATURES -->
+        <section class="features">
+            <h2 class="features-title">how it works</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">◉</span>
+                    <div class="feature-name">One pulse a day</div>
+                    <div class="feature-desc">Choose your emotional state each morning. Once set, it's locked — creating intentionality around how you feel.</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">✦</span>
+                    <div class="feature-name">Daily cards</div>
+                    <div class="feature-desc">Four cards tailored to your mood: a mirror question, a challenge, a lens to see through, and a ritual to practice.</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">◈</span>
+                    <div class="feature-name">Guided reflection</div>
+                    <div class="feature-desc">Two questions that go deeper. Your answers are woven into your story — a private journal of your inner life.</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">◇</span>
+                    <div class="feature-name">Your archetype</div>
+                    <div class="feature-desc">Over time, your dominant emotional pattern reveals an archetype — The Beacon, The Anchor, The Wanderer, The Ember, or The Tide.</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- MOODS -->
+        <section class="moods">
+            <h2 class="features-title">five states of being</h2>
+            <div class="mood-row">
+                <div class="mood-chip"><div class="mood-dot" style="background:#FFD97D;box-shadow:0 0 8px #FFD97D60"></div><span class="mood-label">Luminous</span></div>
+                <div class="mood-chip"><div class="mood-dot" style="background:#74C69D;box-shadow:0 0 8px #74C69D60"></div><span class="mood-label">Steady</span></div>
+                <div class="mood-chip"><div class="mood-dot" style="background:#9D8DF1;box-shadow:0 0 8px #9D8DF160"></div><span class="mood-label">Drifting</span></div>
+                <div class="mood-chip"><div class="mood-dot" style="background:#FF8C69;box-shadow:0 0 8px #FF8C6960"></div><span class="mood-label">Fractured</span></div>
+                <div class="mood-chip"><div class="mood-dot" style="background:#A8B2D8;box-shadow:0 0 8px #A8B2D860"></div><span class="mood-label">Hollow</span></div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- PRIVACY POLICY -->
+        <section class="privacy" id="privacy">
+            <h2>Privacy Policy</h2>
+            <p><em>Last updated: March 2026</em></p>
+
+            <h3>What data we collect</h3>
+            <p>Orba Pulse stores your mood entries, reflections, and app preferences locally on your device. We do not collect, transmit, or store any personal data on external servers unless you explicitly enable cloud sync.</p>
+
+            <h3>Analytics</h3>
+            <p>We use anonymous, aggregated analytics to understand how the app is used (e.g., which features are most popular). This data cannot identify you personally.</p>
+
+            <h3>Third-party services</h3>
+            <p>If you subscribe to Orba Pulse Premium, your subscription is managed through Apple's App Store or Google Play. We use RevenueCat to process subscription data. We do not have access to your payment details.</p>
+
+            <h3>Data you create</h3>
+            <ul>
+                <li>Mood entries and reflections are stored on your device only</li>
+                <li>You can export or delete your data at any time from the app settings</li>
+                <li>We never sell, share, or monetise your personal data</li>
+            </ul>
+
+            <h3>Your rights</h3>
+            <p>You can delete all your data at any time by using the "Delete All Data" option in the app settings, or by uninstalling the app. If you have any questions, contact us at hello@orbapulse.com.</p>
+
+            <h3>Children's privacy</h3>
+            <p>Orba Pulse is not intended for children under 13. We do not knowingly collect data from children.</p>
+
+            <h3>Changes</h3>
+            <p>We may update this policy from time to time. Any changes will be reflected on this page with an updated date.</p>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-brand">orba pulse</div>
+            <div class="footer-copy">&copy; 2026 Orba Pulse. All rights reserved.</div>
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="https://instagram.com/orba_pulse" target="_blank">Instagram</a>
+                <a href="mailto:hello@orbapulse.com">Contact</a>
+            </div>
+        </footer>
+
+    </div>
+</body>
+</html>
